@@ -1,0 +1,542 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MARS — Machine Assets Reporting Standard",
+  "description": "Canonical telemetry schema for autonomous machine performance, ROI, and insurance underwriting. Maintained by MachineAssets.com. Published as open standard under CC BY 4.0. Repository: github.com/machineassets/MARS",
+  "version": "0.9.0",
+  "status": "Public Draft — Community Review Open",
+  "author": "MachineAssets Technical Standards Group",
+  "contact": "emmanuel@machineassets.com",
+  "license": "Creative Commons Attribution 4.0 (CC BY 4.0)",
+  "changelog": {
+    "0.9.0": "Public draft. Core AM-ROI formula, 15 KPIs, MARS Risk Score, RaaS SLA parametric triggers, 3-phase depreciation model, audit chain.",
+    "1.0.0": "Planned Q2 2026. Community-validated, ROS2 SDK, first live pilot data, insurer design partner endorsement."
+  },
+  "type": "object",
+
+  "properties": {
+
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version for forward compatibility",
+      "example": "1.0.0"
+    },
+
+    "record_id": {
+      "type": "string",
+      "description": "Unique immutable identifier for this telemetry record",
+      "format": "uuid"
+    },
+
+    "machine_id": {
+      "type": "string",
+      "description": "Globally unique identifier for this specific robot unit"
+    },
+
+    "vendor": {
+      "type": "string",
+      "description": "Robot manufacturer name",
+      "examples": ["Figure AI", "Boston Dynamics", "Agility Robotics", "Tesla", "ABB", "Fanuc", "Kuka", "Universal Robots"]
+    },
+
+    "model": {
+      "type": "string",
+      "description": "Robot model name",
+      "examples": ["Figure 02", "Atlas", "Digit", "Optimus Gen 3", "UR10e"]
+    },
+
+    "serial_number": {
+      "type": "string",
+      "description": "Manufacturer serial number for physical asset tracking"
+    },
+
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of record creation (UTC)"
+    },
+
+    "record_period": {
+      "type": "object",
+      "description": "Time window this record covers",
+      "properties": {
+        "period_start": { "type": "string", "format": "date-time" },
+        "period_end": { "type": "string", "format": "date-time" },
+        "period_type": {
+          "type": "string",
+          "enum": ["hourly", "daily", "weekly", "monthly", "shift", "mission"]
+        }
+      }
+    },
+
+    "operational_metrics": {
+      "type": "object",
+      "description": "Core reliability and availability metrics — primary inputs for insurance underwriting",
+      "properties": {
+        "uptime_hours": {
+          "type": "number",
+          "description": "Total hours robot was operational (powered on and executing tasks or standing by) in period. Includes both autonomous and human-assisted operation. uptime_hours + downtime_hours should equal total period hours. NOTE: uptime ≠ autonomous operation — use autonomy_score for autonomy measurement."
+        },
+        "downtime_hours": {
+          "type": "number",
+          "description": "Total hours offline or non-operational"
+        },
+        "incident_count": {
+          "type": "integer",
+          "description": "Total number of incidents recorded in period. An incident is any event causing unplanned stoppage, human intervention, safety trigger, or task failure. Raw input for MTBI calculation. REQUIRED for MTBI verification."
+        },
+        "mtbi_hours": {
+          "type": "number",
+          "description": "Mean Time Between Incidents. Calculated as: uptime_hours / incident_count. Analogous to MTBF (Mean Time Between Failures) from reliability engineering — adapted for autonomous machine incidents which include software faults, intervention events, and task failures, not only hardware failures. Higher = more reliable. Minimum: 0."
+        },
+        "intervention_rate": {
+          "type": "number",
+          "description": "Ratio of human-assisted hours to total operating hours (H_assist / H_op). Lower = more autonomous. Key insurance metric. Directly maps to AS: autonomy_score = 1 - intervention_rate.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "recovery_time_seconds": {
+          "type": "number",
+          "description": "Mean elapsed time in seconds from incident detection to return to autonomous operation, regardless of whether human intervention was required. Includes both self-recovery and human-assisted recovery. Complement with recovery_required_human_pct to distinguish recovery types."
+        },
+        "recovery_required_human_pct": {
+          "type": "number",
+          "description": "Percentage of incidents in period that required human physical intervention to resolve. 0.0 = all self-recovered. 1.0 = all required human. For current-generation humanoids, expect 0.30–0.70. As software matures this should trend toward 0.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "autonomy_score": {
+          "type": "number",
+          "description": "Autonomy Score (AS). DERIVED FIELD: AS = 1 - intervention_rate. Stored explicitly for query performance but MUST equal 1 - intervention_rate. Implementations should validate AS + intervention_rate = 1.0 (±0.001 floating point tolerance). Range 0.0–1.0. Used directly in AM-ROI formula. Target for standard insurance rates: AS ≥ 0.85. Target for premium rates: AS ≥ 0.92.",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+
+    "task_metrics": {
+      "type": "object",
+      "description": "Task execution performance — used for RaaS billing and OEM benchmarking",
+      "properties": {
+        "tasks_attempted": {
+          "type": "integer",
+          "description": "Total tasks initiated in period. CONSTRAINT: tasks_attempted = tasks_completed + tasks_failed + tasks_partial. Implementations must validate this constraint. Violation indicates logging error."
+        },
+        "tasks_completed": {
+          "type": "integer",
+          "description": "Tasks completed to full success criteria within spec."
+        },
+        "tasks_failed": {
+          "type": "integer",
+          "description": "Tasks that did not complete and were abandoned or required full restart."
+        },
+        "tasks_partial": {
+          "type": "integer",
+          "description": "Tasks partially completed — robot progressed but did not reach success criteria. For TSR calculation, partial completions count as failed: TSR = tasks_completed / tasks_attempted."
+        },
+        "task_success_ratio": {
+          "type": "number",
+          "description": "tasks_completed / tasks_attempted",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "avg_task_duration_seconds": { "type": "number" },
+        "task_type": {
+          "type": "string",
+          "description": "Primary task category",
+          "examples": ["pick_and_place", "assembly", "palletizing", "inspection", "cleaning", "delivery", "welding"]
+        }
+      }
+    },
+
+    "ai_performance": {
+      "type": "object",
+      "description": "AI model performance metrics — required for Munich Re aiSure brain insurance underwriting",
+      "properties": {
+        "vision_accuracy": {
+          "type": "number",
+          "description": "Correct object identifications / total detections",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "misclassifications": {
+          "type": "integer",
+          "description": "Total incorrect object or scene classifications"
+        },
+        "hallucination_events": {
+          "type": "integer",
+          "description": "Count of detected actions or outputs that deviate from normative operational distribution in this period. Detection requires an anomaly detection system running parallel to the main AI model. Cannot be self-reported by the robot's primary controller. Raw count — pair with tasks_attempted for rate calculation."
+        },
+        "hallucination_rate": {
+          "type": "number",
+          "description": "Hallucination events per task attempted. Calculated as: hallucination_events / tasks_attempted. Range 0.0–1.0. Renamed from hallucination_probability (v0.8) for mathematical precision — this is a rate, not a probability. A value of 0.004 means 4 hallucination events per 1,000 tasks.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "drift_index": {
+          "type": "number",
+          "description": "Model behavioral drift score relative to certified baseline. Methodology: compare distribution of robot action outputs over rolling 7-day window against baseline distribution established at deployment certification. Recommended distance metric: Jensen-Shannon divergence (0.0 = identical to baseline, 1.0 = maximum divergence). Requires baseline snapshot stored at deployment time. 0.0–0.10 = nominal. 0.10–0.25 = monitor. Above 0.25 = recertification recommended. IMPLEMENTATION NOTE: this field requires dedicated behavioral monitoring instrumentation separate from the robot's primary control system.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "model_version": {
+          "type": "string",
+          "description": "AI model version running on this unit"
+        },
+        "last_model_update": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+
+    "stability_safety": {
+      "type": "object",
+      "description": "Physical safety and stability data — required for humanoid liability insurance and ISO compliance",
+      "properties": {
+        "falls_detected": {
+          "type": "integer",
+          "description": "Number of uncommanded falls in period. A fall is defined as any uncontrolled contact between the robot chassis and the ground not initiated by a commanded crouch or rest state. Detected via IMU (inertial measurement unit) threshold crossing."
+        },
+        "fall_severity_index": {
+          "type": "number",
+          "description": "Weighted severity score per fall event. Scale 0.0–10.0. Methodology: 0–2 = self-recovery, no damage, no bystander risk; 3–5 = minor component damage or close proximity to human (<1m); 6–8 = component damage requiring repair or bystander contact; 9–10 = major structural damage or human injury. Score is the mean across all falls_detected in period. If falls_detected = 0, this field should be null or omitted.",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "collision_events": {
+          "type": "integer",
+          "description": "Non-catastrophic collisions with objects or infrastructure per period"
+        },
+        "near_miss_events": {
+          "type": "integer",
+          "description": "Near-miss events with human workers categorized per safety class"
+        },
+        "iso_10218_compliance": {
+          "type": "boolean",
+          "description": "Adherence to ISO 10218-1/2 (Industrial Robots — Safety Requirements). Applicable to fixed-arm industrial robots and robot systems. For humanoids and mobile robots operating alongside humans, also check iso_ts15066_compliance."
+        },
+        "iso_ts15066_compliance": {
+          "type": "boolean",
+          "description": "Adherence to ISO/TS 15066 (Collaborative Robots — Safety Requirements for Human-Robot Collaboration). Applicable to any robot sharing workspace with humans. Replaces iso_25785_compliance from draft schema — ISO 25785 is not a published standard as of 2026. ISO/TS 15066 is the correct reference for collaborative operation safety."
+        },
+        "iso_13482_compliance": {
+          "type": "boolean",
+          "description": "Adherence to ISO 13482 (Personal Care Robots — Safety Requirements). Applicable to service robots in domestic and healthcare environments. Note: no dedicated ISO standard for humanoid robots exists as of March 2026 — humanoids in industrial settings fall under ISO 10218 + ISO/TS 15066."
+        },
+        "safety_score": {
+          "type": "number",
+          "description": "Composite safety score 0–100. Formula: safety_score = 100 × [(1 - fall_rate) × 0.35 + (1 - collision_rate) × 0.35 + (1 - near_miss_rate) × 0.20 + iso_compliance_factor × 0.10]. Where: fall_rate = falls_detected / uptime_hours × 100; collision_rate = collision_events / uptime_hours × 100 (capped at 1.0); near_miss_rate = near_miss_events / uptime_hours × 100 (capped at 1.0); iso_compliance_factor = 0.0 (no compliance) to 1.0 (full compliance across all applicable standards). Higher = safer. Used as input to MARS Risk Score: Safety_score_norm = safety_score / 100.",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+
+    "energy_metrics": {
+      "type": "object",
+      "description": "Energy consumption data for TCO calculation and sustainability reporting",
+      "properties": {
+        "energy_kwh_total": {
+          "type": "number",
+          "description": "Total energy consumed in period (kWh)"
+        },
+        "energy_cost_per_task_usd": {
+          "type": "number",
+          "description": "Average energy cost per completed task in USD"
+        },
+        "peak_power_draw_kw": {
+          "type": "number",
+          "description": "Maximum power draw recorded in period (kW)"
+        },
+        "charge_cycles": {
+          "type": "integer",
+          "description": "Number of charge cycles completed in period"
+        },
+        "battery_health_pct": {
+          "type": "number",
+          "description": "Battery capacity as percentage of original specification",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+
+    "maintenance_metrics": {
+      "type": "object",
+      "description": "Maintenance and repairability data — critical for insurance TCO modeling and asset valuation",
+      "properties": {
+        "repairability_index": {
+          "type": "number",
+          "description": "Ratio of component replacement cost to total machine value. Lower = more repairable.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maintenance_actions_count": {
+          "type": "integer",
+          "description": "Number of maintenance events in period"
+        },
+        "maintenance_cost_usd": {
+          "type": "number",
+          "description": "Total maintenance expenditure in period"
+        },
+        "predicted_component_failure_hours": {
+          "type": "number",
+          "description": "Predicted hours until next component failure (predictive maintenance output)"
+        },
+        "components_replaced": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of components replaced in period"
+        },
+        "total_operating_hours_lifetime": {
+          "type": "number",
+          "description": "Cumulative operating hours since manufacture"
+        }
+      }
+    },
+
+    "financial_metrics": {
+      "type": "object",
+      "description": "Financial performance layer — MachineAssets core differentiator. Transforms operational data into economic intelligence. All monetary fields use currency_code. The AM-ROI formula requires operator-provided inputs (purchase_price_usd, expected_lifespan_years, hle_annual) stored here alongside computed outputs.",
+      "properties": {
+        "currency_code": {
+          "type": "string",
+          "description": "ISO 4217 three-letter currency code for all monetary fields in this object. Default USD. Examples: USD, EUR, GBP, CAD, JPY.",
+          "default": "USD"
+        },
+        "purchase_price": {
+          "type": "number",
+          "description": "Full acquisition cost of this robot unit in currency_code. Includes hardware, initial software licenses, shipping, and installation. Operator-provided. Required for TCO and depreciation calculations. This is P in the AM-ROI formula."
+        },
+        "expected_lifespan_years": {
+          "type": "number",
+          "description": "Expected operational lifespan in years at rated performance. Operator or manufacturer-provided. This is L in the AM-ROI formula: annual_capital_cost = P / L."
+        },
+        "deployment_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date robot entered production deployment (ISO 8601 date). Required to calculate robot_age_days and determine depreciation_phase. Distinct from manufacture date."
+        },
+        "robot_age_days": {
+          "type": "integer",
+          "description": "Days since deployment_date as of record timestamp. DERIVED: robot_age_days = (timestamp - deployment_date) in days. Used to determine depreciation_phase: 0-730 days = rapid_initial, 731-2190 = stable_operational, 2191+ = terminal."
+        },
+        "hle_annual": {
+          "type": "number",
+          "description": "Human Labor Equivalent — fully-loaded annual cost of human worker performing equivalent tasks, in currency_code. Formula: HLE = (hourly_wage × 1.35_employer_burden) × annual_operating_hours. Operator-provided. This is HLE in the AM-ROI formula. The 1.35 multiplier covers payroll taxes, benefits, workers compensation, and overhead — standard industrial labor economics multiplier."
+        },
+        "displacement_factor": {
+          "type": "number",
+          "description": "Degree of human labor displacement (DF). 1.0 = full replacement of one human worker. 0.5 = augmentation — robot works alongside human, each doing half the work. 0.0 = no displacement (robot doing entirely new tasks humans never did). Operator-provided. This is DF in the AM-ROI formula.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "revenue_direct_period": {
+          "type": "number",
+          "description": "Direct revenue generated by robot in this record period, in currency_code. Only applicable where robot output is directly billable (e.g. RaaS, autonomous delivery). For internal deployments where robot supports production, use 0 and rely on HLE displacement value instead."
+        },
+        "cost_per_task": {
+          "type": "number",
+          "description": "All-in cost per completed task in currency_code. Calculated as: TCO_annual / (tasks_completed_annual). Includes amortized capital, energy, maintenance, insurance, and operator cost per task."
+        },
+        "am_roi": {
+          "type": "number",
+          "description": "Autonomous Machine ROI for this period. Canonical MARS formula: AM-ROI = [(R + HLE × DF) × TSR × AS] / TCO_annual. Where R = revenue_direct_period annualized, HLE = hle_annual, DF = displacement_factor, TSR = task_success_ratio, AS = autonomy_score, TCO_annual = (P/L) + C_energy + C_maint + C_operator + C_insurance + C_integration. Interpretation: 1.0 = economic parity with human labor baseline. >1.0 = robot outperforms. Target for scaled production deployment: ≥ 1.4. Below 1.0 is normal in Year 1 for current-generation humanoids."
+        },
+        "tco_annual": {
+          "type": "number",
+          "description": "Total annual cost of ownership in currency_code. Components: (purchase_price / expected_lifespan_years) + energy_cost_annual + maintenance_cost_annual + operator_cost_allocation + insurance_premium_annual + integration_cost_annual. Store computed value here for audit transparency."
+        },
+        "tco_cumulative": {
+          "type": "number",
+          "description": "Cumulative total cost of ownership from deployment_date to record timestamp, in currency_code."
+        },
+        "depreciation_phase": {
+          "type": "string",
+          "enum": ["rapid_initial", "stable_operational", "terminal"],
+          "description": "Current depreciation phase per MARS-DEP three-phase model. Determined by robot_age_days: rapid_initial (days 0-730, yrs 1-2): 20-25% of P per year — driven by technology obsolescence risk and software immaturity. stable_operational (days 731-2190, yrs 3-6): 10-15% of P per year — normal hardware wear cycle. terminal (days 2191+, yr 7+): 5-8% of P per year — residual hardware value, declining parts availability."
+        },
+        "depreciation_rate_annual": {
+          "type": "number",
+          "description": "Actual annual depreciation rate as decimal fraction of purchase_price. Must fall within phase range: rapid_initial 0.20-0.25, stable_operational 0.10-0.15, terminal 0.05-0.08. Example: 0.22 means 22% of purchase price lost per year."
+        },
+        "estimated_resale_value": {
+          "type": "number",
+          "description": "Current estimated resale value in currency_code. Formula: RSV = P × (1 - cumulative_depreciation_rate) × condition_factor × model_factor. Where condition_factor = (TSR_lifetime_avg × 0.6) + (AS_lifetime_avg × 0.4) — weighted average not product, to avoid over-penalizing. model_factor = 0.5-1.0 based on manufacturer active support status and model generation currency. NOTE: resale market for humanoid robots is nascent — treat estimates as indicative until market comparables exist."
+        },
+        "raas_billable_hours": {
+          "type": "number",
+          "description": "Hours eligible for RaaS billing in this period. Billable hours are uptime_hours where TSR over the measurement window ≥ contracted_tsr_minimum AND autonomy_score ≥ contracted_as_minimum. Non-billable hours (below threshold) trigger SLA credit mechanism."
+        },
+        "raas_rate_per_hour": {
+          "type": "number",
+          "description": "Contracted RaaS billing rate per hour in currency_code."
+        },
+        "payback_months_remaining": {
+          "type": "number",
+          "description": "Estimated months until robot reaches full capital cost recovery. Formula: payback_months_remaining = ((purchase_price - cumulative_net_surplus) / monthly_net_surplus). Where monthly_net_surplus = (Net_Value - TCO_excl_capital) / 12. Net_Value = (revenue_direct + HLE × DF) × TSR × AS. TCO_excl_capital excludes the P/L capital component since we are measuring payback of P itself."
+        }
+      }
+    },
+
+    "environment": {
+      "type": "object",
+      "description": "Deployment context — required for benchmark normalization and risk classification",
+      "properties": {
+        "facility_id": {
+          "type": "string",
+          "description": "Anonymized facility identifier"
+        },
+        "location_country": {
+          "type": "string",
+          "description": "ISO 3166-1 alpha-2 country code"
+        },
+        "deployment_type": {
+          "type": "string",
+          "enum": ["automotive_manufacturing", "logistics_warehouse", "healthcare", "retail", "agricultural", "construction", "last_mile_delivery", "domestic", "other"],
+          "description": "Operational environment classification for benchmark normalization"
+        },
+        "terrain_type": {
+          "type": "string",
+          "enum": ["flat_indoor", "uneven_indoor", "outdoor_paved", "outdoor_unpaved", "mixed"],
+          "description": "Surface type affecting stability and safety scoring"
+        },
+        "temperature_c": {
+          "type": "number",
+          "description": "Ambient temperature in Celsius"
+        },
+        "humidity_pct": {
+          "type": "number",
+          "description": "Relative humidity percentage",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "human_coworkers_present": {
+          "type": "boolean",
+          "description": "Whether robot operates in shared space with human workers"
+        }
+      }
+    },
+
+    "mars_risk_score": {
+      "type": "object",
+      "description": "MARS Risk Score (MRS) — computed insurance underwriting input. Formula: MRS = (TSR × 0.30) + (AS × 0.25) + (MTBI_norm × 0.20) + (Safety_score_norm × 0.25). All inputs must be on 0.0–1.0 scale. Safety_score_norm = safety_score / 100 (normalizes 0-100 scale). Weights sum to 1.00. Higher MRS = lower risk = lower premium. Formula weights reflect relative insurer priority: task performance (30%), operational autonomy (25%), incident frequency (20%), physical safety (25%). Weights are v0.9 defaults — insurers may apply custom weights via contract.",
+      "properties": {
+        "mrs_value": {
+          "type": "number",
+          "description": "Computed MRS for this record period. Premium tier mapping: 0.90–1.00 = Excellent (0.8–1.2% of P annually). 0.80–0.89 = Good (1.2–2.0%). 0.70–0.79 = Standard (2.0–3.5%). 0.60–0.69 = Elevated risk (3.5–6.0%). Below 0.60 = Not eligible for standard underwriting.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "mrs_risk_class": {
+          "type": "string",
+          "enum": ["excellent", "good", "standard", "elevated", "uninsurable"],
+          "description": "Risk classification derived from mrs_value thresholds."
+        },
+        "mtbi_normalized": {
+          "type": "number",
+          "description": "MTBI normalized for MRS input. Formula: min(mtbi_hours / mtbi_benchmark_for_deployment_type, 1.0). Benchmark values by deployment type: automotive_manufacturing=200hrs, logistics_warehouse=150hrs, healthcare=500hrs, retail=100hrs, agricultural=80hrs, last_mile_delivery=120hrs. Capped at 1.0 — exceeding benchmark does not improve score beyond maximum.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "safety_score_normalized": {
+          "type": "number",
+          "description": "Safety score normalized for MRS input. Calculated as: safety_score / 100. Stored explicitly for audit transparency.",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+
+    "raas_sla": {
+      "type": "object",
+      "description": "RaaS SLA performance tracking. Parametric triggers fire automatically when thresholds are breached — no human claims adjudication required. Thresholds are set at contract signing and stored here for audit purposes.",
+      "properties": {
+        "contracted_tsr_minimum": {
+          "type": "number",
+          "description": "Contracted minimum Task Success Ratio. Standard threshold: 0.85. Breach triggers daily rate credit to operator.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contracted_uptime_minimum": {
+          "type": "number",
+          "description": "Contracted minimum uptime ratio. Standard threshold: 0.90 (90%). Breach triggers pro-rata RaaS fee refund.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contracted_as_minimum": {
+          "type": "number",
+          "description": "Contracted minimum Autonomy Score. Standard threshold: 0.80. Breach triggers labor cost differential coverage.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contracted_mtbi_minimum_hours": {
+          "type": "number",
+          "description": "Contracted minimum MTBI in hours. Standard threshold: 100 hours. Breach activates enhanced maintenance coverage."
+        },
+        "contracted_vision_accuracy_minimum": {
+          "type": "number",
+          "description": "Contracted minimum vision accuracy. Standard threshold: 0.92. NOTE: 0.98 is not achievable for current-generation humanoids in production environments — 0.92 reflects actual deployment benchmarks. Breach triggers AI performance review clause.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contracted_collision_max_per_100hrs": {
+          "type": "number",
+          "description": "Maximum allowable collision events per 100 operating hours. Standard threshold: 2.0. Breach triggers liability coverage enhancement."
+        },
+        "sla_period_start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start of current SLA measurement period"
+        },
+        "sla_status": {
+          "type": "string",
+          "enum": ["compliant", "warning", "breach", "remediation"],
+          "description": "Current SLA status. warning = within 10% of threshold. breach = threshold crossed, payout triggered. remediation = active recovery plan in place."
+        },
+        "active_breach_metrics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of metrics currently in breach, e.g. ['tsr', 'mtbi']"
+        }
+      }
+    },
+
+    "audit": {
+      "type": "object",
+      "description": "Data integrity and provenance — required for insurance claims validation",
+      "properties": {
+        "data_source": {
+          "type": "string",
+          "enum": ["direct_sdk", "ros2_bridge", "vendor_api", "manual_entry", "simulation"],
+          "description": "How this data was collected"
+        },
+        "record_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of record content for tamper detection"
+        },
+        "signing_key_id": {
+          "type": "string",
+          "description": "ID of cryptographic key used to sign this record"
+        },
+        "certified_by": {
+          "type": "string",
+          "description": "Certifying entity if third-party validated"
+        }
+      }
+    }
+  },
+
+  "required": [
+    "schema_version",
+    "record_id",
+    "machine_id",
+    "vendor",
+    "model",
+    "timestamp",
+    "operational_metrics",
+    "task_metrics",
+    "stability_safety",
+    "audit"
+  ]
+}
