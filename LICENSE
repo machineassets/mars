@@ -1,0 +1,50 @@
+Creative Commons Zero v1.0 Universal (CC0 1.0) Public Domain Dedication
+
+MARS — Machine Assets Reporting Standard
+Copyright (c) 2026 MachineAssets (machineassets.ai)
+
+=======================================================================
+
+The person who associated a work with this deed has dedicated the work
+to the public domain by waiving all of his or her rights to the work
+worldwide under copyright law, including all related and neighboring
+rights, to the extent allowed by law.
+
+You can copy, modify, distribute and perform the work, even for
+commercial purposes, all without asking permission.
+
+=======================================================================
+
+LICENSING NOTES:
+
+This LICENSE applies to the MARS schema (schema/MARS_v0.9.json)
+and all code in this repository (examples/, sdk/).
+
+The MARS Methodology document (docs/MARS_v0.9_Methodology.pdf)
+is published under Creative Commons Attribution 4.0 (CC BY 4.0).
+When using or adapting the methodology, attribution to MachineAssets
+is required. Full license: https://creativecommons.org/licenses/by/4.0/
+
+=======================================================================
+
+DISCLAIMER:
+
+THE MARS STANDARD IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED. MACHINEASSETS MAKES NO REPRESENTATIONS OR WARRANTIES
+REGARDING THE ACCURACY, COMPLETENESS, OR FITNESS FOR ANY PARTICULAR
+PURPOSE OF THE FORMULAS, BENCHMARKS, OR METHODOLOGY CONTAINED HEREIN.
+
+Company names, manufacturers, and deployment references in MARS
+documentation are used for illustrative purposes only. All performance
+figures and financial estimates are based on publicly available
+information. MARS is not affiliated with, sponsored by, or endorsed by
+any manufacturer, insurer, or operator referenced in this repository.
+
+Nothing in the MARS standard constitutes financial, legal, or insurance
+advice. Benchmark values and formula weights are v0.9 estimates and
+should be validated against empirical data before use in binding
+contracts or underwriting decisions.
+
+=======================================================================
+
+Full CC0 license text: https://creativecommons.org/publicdomain/zero/1.0/
