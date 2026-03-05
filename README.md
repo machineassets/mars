@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/25779789/README.md)
+[README.md](https://github.com/user-attachments/files/25780967/README.md)
 # MARS — Machine Assets Reporting Standard
 
 **The open neutral telemetry schema for autonomous machine performance, ROI calculation, and insurance underwriting.**
@@ -91,7 +91,7 @@ MRS = (TSR × 0.30) + (AS × 0.25) + (MTBI_norm × 0.20) + (Safety_norm × 0.25)
 ### 1. Download the Schema
 
 ```bash
-curl -O https://raw.githubusercontent.com/machineassets/MARS/main/MARS_v0.9.json
+curl -O https://raw.githubusercontent.com/machineassets/mars/main/schema/MARS_v0.9.json
 ```
 
 ### 2. Validate a Record
@@ -255,7 +255,7 @@ MARS v0.9 is a public draft actively seeking review from:
 | File | License |
 |------|---------|
 | `MARS_v0.9.json` | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) — public domain, no conditions, maximum adoption |
-| `MARS_v0.9_Methodology.docx` | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — free to use and adapt with attribution to MachineAssets |
+| `MARS_v0.9_Methodology.pdf` | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — free to use and adapt with attribution to MachineAssets |
 
 The schema is public domain. Standards only work when there is zero friction to adoption.
 The methodology is attributed. The intellectual framework carries the MachineAssets name.
