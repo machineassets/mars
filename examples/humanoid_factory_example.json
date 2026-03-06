@@ -1,0 +1,153 @@
+{
+  "$schema": "https://raw.githubusercontent.com/machineassets/mars/main/schema/MARS_v0.9.json",
+  "schema_version": "0.9.0",
+  "record_id": "7f3a2c1e-8b4d-4e5f-9a0b-c12d3e4f5a6b",
+  "machine_id": "FIG02-BMW-SPB-0042",
+  "vendor": "Figure AI",
+  "model": "Figure 02",
+  "serial_number": "FIG02-2025-0042-US",
+  "timestamp": "2026-02-28T23:59:59Z",
+
+  "record_period": {
+    "period_start": "2026-02-01T00:00:00Z",
+    "period_end": "2026-02-28T23:59:59Z",
+    "period_type": "monthly"
+  },
+
+  "operational_metrics": {
+    "_comment_period_check": "608.0 uptime + 64.0 downtime = 672.0 = 28 days × 24 hrs",
+    "uptime_hours": 608.0,
+    "downtime_hours": 64.0,
+    "_comment_mtbi": "MTBI = uptime_hours / incident_count = 608.0 / 4 = 152.0",
+    "incident_count": 4,
+    "mtbi_hours": 152.0,
+    "_comment_as": "AS = 1 - intervention_rate = 1 - 0.10 = 0.90; AS + intervention_rate = 1.00",
+    "intervention_rate": 0.10,
+    "autonomy_score": 0.90,
+    "recovery_time_seconds": 47.3,
+    "recovery_required_human_pct": 0.50
+  },
+
+  "task_metrics": {
+    "_comment_tsr": "TSR = tasks_completed / tasks_attempted = 13671 / 14700 = 0.93000",
+    "_comment_sum": "tasks_completed + tasks_failed + tasks_partial = 13671 + 588 + 441 = 14700",
+    "tasks_attempted": 14700,
+    "tasks_completed": 13671,
+    "tasks_failed": 588,
+    "tasks_partial": 441,
+    "task_success_ratio": 0.930,
+    "avg_task_duration_seconds": 149.0,
+    "task_type": "pick_and_place"
+  },
+
+  "ai_performance": {
+    "_comment_hallucination_rate": "hallucination_rate = 9 / 14700 = 0.000612",
+    "vision_accuracy": 0.963,
+    "misclassifications": 3700,
+    "hallucination_events": 9,
+    "hallucination_rate": 0.000612,
+    "drift_index": 0.062,
+    "model_version": "helix-2.4.1",
+    "last_model_update": "2026-01-08T00:00:00Z"
+  },
+
+  "stability_safety": {
+    "_comment_safety_score": "safety_score = 100×[(1−fall_rate)×0.35+(1−collision_rate)×0.35+(1−near_miss_rate)×0.20+iso_factor×0.10]. fall_rate=0/608×100=0; collision_rate=1/608×100=0.16447; near_miss_rate=2/608×100=0.32895; iso_factor=1.0. Result=100×[0.35000+0.29244+0.13421+0.10000]=87.66",
+    "falls_detected": 0,
+    "collision_events": 1,
+    "near_miss_events": 2,
+    "iso_10218_compliance": true,
+    "iso_ts15066_compliance": true,
+    "iso_13482_compliance": false,
+    "safety_score": 87.66
+  },
+
+  "energy_metrics": {
+    "_comment_energy": "608 uptime_hrs × ~2.0 kW avg = 1216 kWh. energy_cost_per_task = (1216 × $0.07) / 13671 = $85.12 / 13671 = $0.006",
+    "energy_kwh_total": 1216.0,
+    "energy_cost_per_task_usd": 0.006,
+    "peak_power_draw_kw": 3.2,
+    "charge_cycles": 42,
+    "battery_health_pct": 98.2
+  },
+
+  "maintenance_metrics": {
+    "_comment_maintenance_cost": "Period cost = $22000/yr × (28/365) = $1690",
+    "repairability_index": 0.08,
+    "maintenance_actions_count": 3,
+    "maintenance_cost_usd": 1690.0,
+    "predicted_component_failure_hours": 2200.0,
+    "components_replaced": ["left_hip_actuator_filter"],
+    "total_operating_hours_lifetime": 5600.0
+  },
+
+  "financial_metrics": {
+    "_comment_am_roi": "AM-ROI = [(R + HLE×DF) × TSR × AS] / TCO_annual = [(0 + 78000×0.85) × 0.930 × 0.90] / 74000 = [66300 × 0.837] / 74000 = 55493.10 / 74000 = 0.7499",
+    "_comment_tco": "TCO_annual = P/L + C_energy + C_maint + C_operator + C_insurance + C_integration = (250000/7=35714.29) + 1100 + 22000 + 8000 + 3500 + 3685.71 = 74000.00",
+    "currency_code": "USD",
+    "purchase_price": 250000,
+    "expected_lifespan_years": 7,
+    "deployment_date": "2025-06-15",
+    "_comment_robot_age": "2026-02-28 minus 2025-06-15 = 15+31+31+30+31+30+31+31+28 = 258 days → rapid_initial phase (0–730 days)",
+    "robot_age_days": 258,
+    "_comment_hle": "HLE = $28.00/hr × 1.35 employer burden × 2080 hrs/yr = $78,624 → rounded to $78,000",
+    "hle_annual": 78000,
+    "displacement_factor": 0.85,
+    "revenue_direct_period": 0,
+    "_comment_cost_per_task": "cost_per_task = TCO_annual / tasks_completed_annual = 74000 / (13671×365/28) = 74000 / 178,128 = $0.415",
+    "cost_per_task": 0.415,
+    "am_roi": 0.750,
+    "tco_annual": 74000,
+    "_comment_tco_cumulative": "TCO_cumulative = (258/365) × 74000 = 0.70685 × 74000 = $52,307",
+    "tco_cumulative": 52307,
+    "depreciation_phase": "rapid_initial",
+    "depreciation_rate_annual": 0.22,
+    "_comment_rsv": "RSV = P×(1−cum_dep)×condition_factor×model_factor. cum_dep=0.22×(258/365)=0.15551; (1−0.15551)=0.84449. condition_factor=(TSR×0.6)+(AS×0.4)=(0.930×0.6)+(0.90×0.4)=0.558+0.360=0.918. model_factor=0.75 (active support, nascent resale market). RSV=250000×0.84449×0.918×0.75=145,350",
+    "estimated_resale_value": 145350,
+    "_comment_raas": "All 608 uptime hours qualify: TSR 0.930≥0.88 and AS 0.90≥0.85",
+    "raas_billable_hours": 608.0,
+    "raas_rate_per_hour": 12.50,
+    "_comment_payback": "monthly_surplus=(Net_Value−TCO_excl_capital)/12=(55493.10−38285.71)/12=1433.95. cum_surplus=8.48mo×1433.95=$12,154. payback_remaining=(250000−12154)/1433.95=165.9 mo. Below 1.0 AM-ROI in Y1 is expected per schema.",
+    "payback_months_remaining": 165.9
+  },
+
+  "environment": {
+    "facility_id": "BMW-SPB-BODY-03",
+    "location_country": "US",
+    "deployment_type": "automotive_manufacturing",
+    "terrain_type": "flat_indoor",
+    "temperature_c": 22.4,
+    "humidity_pct": 48.2,
+    "human_coworkers_present": true
+  },
+
+  "mars_risk_score": {
+    "_comment_mrs": "MRS = (TSR×0.30)+(AS×0.25)+(MTBI_norm×0.20)+(Safety_norm×0.25) = (0.930×0.30)+(0.90×0.25)+(0.760×0.20)+(0.8766×0.25) = 0.2790+0.2250+0.1520+0.2192 = 0.8752 → 'good' tier (0.80–0.89)",
+    "_comment_mtbi_norm": "MTBI_norm = min(152.0 / 200_automotive_benchmark, 1.0) = min(0.760, 1.0) = 0.760",
+    "_comment_safety_norm": "safety_score_normalized = 87.66 / 100 = 0.8766",
+    "mrs_value": 0.875,
+    "mrs_risk_class": "good",
+    "mtbi_normalized": 0.760,
+    "safety_score_normalized": 0.877
+  },
+
+  "raas_sla": {
+    "_comment_sla": "All metrics compliant. Uptime ratio 608/672=0.9048≥0.90 (tight margin). No breaches this period.",
+    "contracted_tsr_minimum": 0.88,
+    "contracted_uptime_minimum": 0.90,
+    "contracted_as_minimum": 0.85,
+    "contracted_mtbi_minimum_hours": 80.0,
+    "contracted_vision_accuracy_minimum": 0.92,
+    "contracted_collision_max_per_100hrs": 2.0,
+    "sla_period_start": "2026-02-01T00:00:00Z",
+    "sla_status": "compliant",
+    "active_breach_metrics": []
+  },
+
+  "audit": {
+    "data_source": "direct_sdk",
+    "record_hash": "a3f2e91bc4d80e7b5b19a4c23f7d8e9b1a2c3d4e5f6071829304b5c6d7e8f9ab",
+    "signing_key_id": "mars-sdk-fig02-spb-001",
+    "certified_by": "MachineAssets Telemetry Gateway v0.9.0"
+  }
+}

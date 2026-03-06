@@ -1,0 +1,171 @@
+{
+  "$schema": "https://raw.githubusercontent.com/machineassets/mars/main/schema/MARS_v0.9.json",
+  "schema_version": "0.9.0",
+  "record_id": "f2e3d4c5-b6a7-4f8e-9d0c-a1b2c3d4e5f6",
+  "machine_id": "MIR200-NL-RTM-0089",
+  "vendor": "Mobile Industrial Robots",
+  "model": "MiR200",
+  "serial_number": "MIR200-2023-0089-EU",
+  "timestamp": "2026-03-31T23:59:59Z",
+
+  "record_period": {
+    "period_start": "2026-03-01T00:00:00Z",
+    "period_end": "2026-03-31T23:59:59Z",
+    "period_type": "monthly"
+  },
+
+  "operational_metrics": {
+    "_comment_period_check": "712.0 uptime + 32.0 downtime = 744.0 = 31 days × 24 hrs ✓. AMR runs near-continuously in 24/7 logistics centre; 32 hrs downtime covers scheduled fleet charging windows (AMR auto-docks) and one 4-hr quarterly maintenance slot.",
+    "uptime_hours": 712.0,
+    "downtime_hours": 32.0,
+    "_comment_mtbi": "MTBI = uptime_hours / incident_count = 712.0 / 3 = 237.333 → stored 237.33. MTBI_norm for logistics_warehouse benchmark (150 hrs) = min(237.33/150, 1.0) = min(1.5822, 1.0) = 1.000 — score is capped, robot exceeds benchmark by 58%.",
+    "incident_count": 3,
+    "mtbi_hours": 237.33,
+    "_comment_as": "AS = 1 − intervention_rate = 1 − 0.04 = 0.96. AS + intervention_rate = 0.96 + 0.04 = 1.00 ✓. Autonomy score 0.96 exceeds 0.92 'premium rate' threshold per schema. Mature AMR with well-mapped facility requires minimal human assistance.",
+    "intervention_rate": 0.04,
+    "autonomy_score": 0.96,
+    "_comment_recovery": "Mean 18.5 s recovery. AMR self-corrects via obstacle rerouting in 67% of incidents; only 33% required human assist (e.g. aisle blocked by mis-placed pallet requiring manual clearance).",
+    "recovery_time_seconds": 18.5,
+    "recovery_required_human_pct": 0.33
+  },
+
+  "task_metrics": {
+    "_comment_tsr": "TSR = tasks_completed / tasks_attempted = 13845 / 14200 = 0.97500 ✓",
+    "_comment_sum": "tasks_completed + tasks_failed + tasks_partial = 13845 + 142 + 213 = 14200 ✓",
+    "_comment_utilisation": "Active task-seconds = 14200 × 180 = 2,556,000 s = 710 hrs. 710/712 uptime = 99.7% task utilisation — AMR is always in motion or loading/unloading, consistent with tightly scheduled warehouse slot allocation.",
+    "tasks_attempted": 14200,
+    "tasks_completed": 13845,
+    "tasks_failed": 142,
+    "tasks_partial": 213,
+    "task_success_ratio": 0.975,
+    "_comment_cycle": "180 s per delivery run: ~60 s travel loaded, ~30 s dock/undock at pick station, ~60 s travel return, ~30 s dock at drop station. Route variance ±20 s from dynamic obstacle avoidance.",
+    "avg_task_duration_seconds": 180.0,
+    "task_type": "delivery"
+  },
+
+  "ai_performance": {
+    "_comment_hallucination_rate": "hallucination_rate = hallucination_events / tasks_attempted = 7 / 14200 = 0.000493 ✓. Mature model with 24 months production data shows stable low hallucination floor.",
+    "_comment_drift": "drift_index 0.031 indicates minimal behavioral drift from certified baseline — well within 0.00–0.10 nominal band. Last model update 2025-11-04 (5 months prior); stable software contributes to low drift. AMR navigates same mapped facility daily vs humanoids facing novel object configurations.",
+    "vision_accuracy": 0.958,
+    "misclassifications": 2800,
+    "hallucination_events": 7,
+    "hallucination_rate": 0.000493,
+    "drift_index": 0.031,
+    "model_version": "mir-nav-3.7.1",
+    "last_model_update": "2025-11-04T00:00:00Z"
+  },
+
+  "stability_safety": {
+    "_comment_safety_score": "Formula: 100×[(1−fall_rate)×0.35+(1−collision_rate)×0.35+(1−near_miss_rate)×0.20+iso_factor×0.10]. Rates per 100 uptime hrs: fall_rate=0 (wheeled AMR cannot fall — no legs); collision_rate=2/712×100=0.28090 (below 1.0 cap); near_miss_rate=4/712×100=0.56180 (below 1.0 cap). iso_compliance_factor=1.0 (fully compliant with all APPLICABLE standards — see compliance note). Result=100×[(1.0×0.35)+(0.71910×0.35)+(0.43820×0.20)+(1.0×0.10)]=100×[0.35000+0.25169+0.08764+0.10000]=100×0.78933=78.93 ✓",
+    "_comment_falls": "falls_detected is 0 and will always be 0 for a wheeled AMR: schema defines fall as 'uncontrolled contact between robot chassis and ground not initiated by commanded crouch or rest state.' A wheeled mobile robot has no stance to lose. fall_severity_index omitted per schema rule: 'if falls_detected = 0, this field should be null or omitted.'",
+    "falls_detected": 0,
+    "collision_events": 2,
+    "near_miss_events": 4,
+    "_comment_compliance": "iso_10218_compliance=false: ISO 10218-1/2 governs fixed industrial robot arms — not applicable to mobile AMRs. iso_ts15066_compliance=true: ISO/TS 15066 covers human-robot collaborative operation and is the primary applicable safety standard for this shared-workspace AMR. iso_13482_compliance=false: personal care robots — N/A for industrial logistics AMR. iso_compliance_factor=1.0 because the robot is fully compliant with all APPLICABLE standards.",
+    "iso_10218_compliance": false,
+    "iso_ts15066_compliance": true,
+    "iso_13482_compliance": false,
+    "safety_score": 78.93
+  },
+
+  "energy_metrics": {
+    "_comment_energy": "712 uptime_hrs × 0.63 kW avg draw = 448.6 kWh → 450 kWh. MiR200 draws 0.3–0.9 kW depending on load and speed; 0.63 kW reflects loaded-run average. Dutch industrial electricity rate EUR 0.12/kWh. Period cost = 450 × 0.12 = EUR 54.00. energy_cost_per_task (EUR) = 54.00 / 13845 completed = EUR 0.0039 → 0.004. Annual energy = 450 × 12 × 0.12 = EUR 648 ≈ EUR 650 TCO component ✓. NOTE: field named '_usd' but value in EUR per financial_metrics.currency_code.",
+    "energy_kwh_total": 450.0,
+    "energy_cost_per_task_usd": 0.004,
+    "peak_power_draw_kw": 0.9,
+    "_comment_charge_cycles": "AMR auto-docks at charging station when battery < 20%. With ~10 kWh effective battery and 0.63 kW avg consumption, run time ≈ 15.9 hrs per charge. 712 uptime_hrs / 15.9 = 44.8 → 68 charge cycles accounting for opportunity charges during shift handovers.",
+    "charge_cycles": 68,
+    "_comment_battery": "battery_health_pct 88.5 reflects natural capacity fade after 24 months and 68+ charge cycles/month. MiR200 uses lithium-ion; industry benchmark ≈ 80% health at 1000 cycles. At ~68 cycles/month × 24 months ≈ 1632 total cycles; 88.5% is consistent.",
+    "battery_health_pct": 88.5
+  },
+
+  "maintenance_metrics": {
+    "_comment_maintenance_cost": "Period cost (EUR) = EUR 5,000/yr × (31/365) = EUR 424.66 → EUR 425. AMR maintenance is far cheaper than humanoids: no complex actuator systems, well-established spare parts supply, most maintenance is predictive wheel-tread and sensor cleaning.",
+    "repairability_index": 0.06,
+    "maintenance_actions_count": 4,
+    "maintenance_cost_usd": 425.0,
+    "predicted_component_failure_hours": 3500.0,
+    "components_replaced": ["left_drive_wheel_tread", "lidar_lens_cover"],
+    "_comment_lifetime_hours": "Deployed 2024-01-01; avg uptime 712/31=22.97 hrs/day. First 5 months (commissioning ramp-up, reduced hours ~18 hrs/day): 153 days × 18 = 2,754 hrs. Subsequent 668 days at 22.97 hrs/day: 15,344 hrs. Total ≈ 18,098 hrs → stored 18,100.",
+    "total_operating_hours_lifetime": 18100.0
+  },
+
+  "financial_metrics": {
+    "_comment_currency": "All monetary values in Euros (ISO 4217: EUR). currency_code governs all monetary fields in this object.",
+    "_comment_am_roi": "AM-ROI = [(R + HLE×DF) × TSR × AS] / TCO_annual. R=0 (internal deployment). Step 1: HLE×DF = 41000 × 0.90 = 36900. Step 2: ×TSR×AS = 36900 × 0.975 × 0.96 = 36900 × 0.9360 = 34538.40. Step 3: AM-ROI = 34538.40 / 14375 = 2.4024 → stored 2.40. Interpretation: robot generates EUR 2.40 of value for every EUR 1.00 of annual cost — exceeds ≥1.4 'scaled production deployment' target per schema. Mature stable_operational AMR significantly outperforms human labour baseline.",
+    "_comment_tco": "TCO_annual (EUR) = P/L + C_energy + C_maint + C_operator + C_insurance + C_integration = (35000÷8=4375.00) + 650 + 5000 + 1500 + 350 + 2500 = EUR 14,375.00 ✓. C_insurance = EUR 350 = 1.0% × 35000, consistent with MRS 0.930 excellent tier (schema band: 0.8–1.2% of P annually). Lower absolute TCO than humanoid examples reflects AMR cost structure: no bimanual actuators, simpler maintenance, lower energy draw.",
+    "currency_code": "EUR",
+    "purchase_price": 35000,
+    "_comment_lifespan": "AMRs have longer expected lifespans than humanoids (simpler kinematics, mature technology). 8-year lifespan vs 7-year for humanoids.",
+    "expected_lifespan_years": 8,
+    "deployment_date": "2024-01-01",
+    "_comment_robot_age": "2026-03-31 minus 2024-01-01: 2024(366 days, leap year) + 2025(365 days) + 2026 Jan–Mar(31+28+31=90 days) = 821 days ✓ → stable_operational phase (731–2190 days). Robot crossed from rapid_initial at day 730 ≈ 2025-12-30. User context: '18 months stable operation' refers to production runtime since commissioning completion in ~May 2024, approximately 22 months before record date; operator rounds to 18 months.",
+    "robot_age_days": 821,
+    "_comment_hle": "HLE = EUR 14.60/hr × 1.35 employer burden multiplier × 2080 hrs/yr = EUR 40,999 → rounded to EUR 41,000. Reflects Dutch warehouse material-handler rate including social security (31.5% employer contribution), holiday allowance, and overhead. Source: Netherlands CAO Logistiek sector benchmark.",
+    "hle_annual": 41000,
+    "_comment_displacement_factor": "DF=0.90: AMR autonomously handles 90% of a manual cart-pusher/forklift-assistant role (goods movement between pick zones, replenishment runs, despatch conveyor feeds). 10% residual human involvement for exception handling (mis-placed stock, oversized items, system overrides).",
+    "displacement_factor": 0.90,
+    "revenue_direct_period": 0,
+    "_comment_cost_per_task": "cost_per_task = TCO_annual / tasks_completed_annual = 14375 / (13845 × 365÷31) = 14375 / 163,039 = EUR 0.0882 → stored 0.088. AMR delivery runs cost EUR 0.088 each vs EUR 1.29 for humanoid logistics (TMMC) — structural difference driven by shorter cycle time and lower TCO.",
+    "cost_per_task": 0.088,
+    "am_roi": 2.40,
+    "tco_annual": 14375,
+    "_comment_tco_cumulative": "TCO_cumulative = (821÷365) × 14375 = 2.24932 × 14375 = EUR 32,334",
+    "tco_cumulative": 32334,
+    "_comment_depreciation": "stable_operational phase (days 731–2190). depreciation_rate_annual 0.12 = 12% within valid stable_operational range 0.10–0.15 ✓.",
+    "depreciation_phase": "stable_operational",
+    "depreciation_rate_annual": 0.12,
+    "_comment_rsv": "RSV = P×(1−cum_dep)×condition_factor×model_factor. Multi-phase cum_dep: rapid_initial 2.0 yrs × 0.22 = 0.44; stable_operational (821−730=91 days) × 0.12÷365 = 0.02992; total cum_dep = 0.46992; (1−0.46992) = 0.53008. condition_factor=(TSR×0.6)+(AS×0.4)=(0.975×0.6)+(0.96×0.4)=0.585+0.384=0.969. model_factor=0.70 (MiR actively supported; AMR resale market more established than humanoids but still developing). RSV=35000×0.53008×0.969×0.70=35000×0.35956=EUR 12,584.",
+    "estimated_resale_value": 12584,
+    "_comment_raas": "All 712 uptime hours qualify: TSR 0.975 ≥ 0.92 AND AS 0.96 ≥ 0.90 contracted minimums. raas_rate_per_hour EUR 4.50 reflects European AMR RaaS market rate (lower than humanoid RaaS due to simpler risk profile).",
+    "raas_billable_hours": 712.0,
+    "raas_rate_per_hour": 4.50,
+    "_comment_payback": "Net_Value_annual = 34538.40. TCO_excl_capital = 14375 − 4375 = EUR 10,000. annual_surplus = 34538.40 − 10000 = EUR 24,538.40. monthly_surplus = 24538.40÷12 = EUR 2,044.87. Capital payback achieved at: 35000÷2044.87 = 17.1 months from deployment (≈ 2025-06-05). months_elapsed = 821÷30.4167 = 26.99. cum_surplus = 26.99 × 2044.87 = EUR 55,191. payback_months_remaining = (35000 − 55191) ÷ 2044.87 = −20191÷2044.87 = −9.9. NEGATIVE VALUE: full capital cost recovery was achieved 9.9 months ago. Robot is now generating pure net surplus of EUR 2,044.87/month beyond all costs.",
+    "payback_months_remaining": -9.9
+  },
+
+  "environment": {
+    "_comment_facility": "Major European e-commerce fulfilment centre, Rotterdam Logistics Park. MiR200 fleet of 12 units operates in goods-to-person zone (Zone DC-12), moving tote-bins between automated storage/retrieval system (ASAS) and pick stations. Mixed traffic with human pickers, reach trucks, and conveyor feeds.",
+    "facility_id": "NL-RTM-DC-12",
+    "location_country": "NL",
+    "deployment_type": "logistics_warehouse",
+    "terrain_type": "flat_indoor",
+    "_comment_environment": "Warehouse maintained at 18.5°C per EU food-adjacent cold-chain adjacency requirements. humidity_pct 55% typical for Netherlands climate-controlled logistics facility.",
+    "temperature_c": 18.5,
+    "humidity_pct": 55.0,
+    "human_coworkers_present": true
+  },
+
+  "mars_risk_score": {
+    "_comment_mrs": "MRS = (TSR×0.30)+(AS×0.25)+(MTBI_norm×0.20)+(Safety_norm×0.25). MTBI_norm=min(237.33÷150,1.0)=min(1.5822,1.0)=1.000 (CAPPED — robot far exceeds logistics_warehouse 150-hr benchmark). Safety_norm=78.93÷100=0.7893. Calculation: (0.975×0.30)+(0.96×0.25)+(1.000×0.20)+(0.7893×0.25)=0.29250+0.24000+0.20000+0.19733=0.92983 → stored 0.930. Risk class: 'excellent' (0.90–1.00). Premium band: 0.8–1.2% of P — reflected in C_insurance=1.0%×EUR 35000=EUR 350 in TCO. Weights sum: 0.30+0.25+0.20+0.25=1.00 ✓.",
+    "_comment_mtbi_norm": "MTBI_norm=min(237.33÷150_logistics_warehouse_benchmark,1.0)=1.000. Capped at 1.0 per schema rule: 'exceeding benchmark does not improve score beyond maximum.' Actual MTBI is 58% above benchmark, reflecting mature fleet with well-mapped facility and software-stable autonomous navigation.",
+    "_comment_safety_norm": "safety_score_normalized=78.93÷100=0.7893 → stored 0.789. Safety score is the primary drag on MRS: near-miss rate of 0.562/100 hrs reflects busy human-shared warehouse floor. AMR cannot benefit from zero fall_rate the way humanoid metrics can, since falls do not apply.",
+    "mrs_value": 0.930,
+    "mrs_risk_class": "excellent",
+    "mtbi_normalized": 1.000,
+    "safety_score_normalized": 0.789
+  },
+
+  "raas_sla": {
+    "_comment_sla": "All six metrics compliant. Uptime ratio 712÷744=0.9570 ≥ contracted 0.90. Mature AMR in stable_operational phase consistently exceeds all SLA thresholds; contracted minimums set at renewal (Jan 2026) reflecting proven track record.",
+    "_comment_thresholds": "Higher contracted minimums than humanoid examples reflect AMR maturity premium: TSR floor 0.92 vs Digit TMMC 0.87 and Figure 02 BMW 0.88; AS floor 0.90 vs Digit 0.82 and Figure 02 0.85. Premium thresholds trigger if AMR regresses — providing operator protection against unexpected software degradation.",
+    "contracted_tsr_minimum": 0.92,
+    "contracted_uptime_minimum": 0.90,
+    "contracted_as_minimum": 0.90,
+    "contracted_mtbi_minimum_hours": 100.0,
+    "contracted_vision_accuracy_minimum": 0.92,
+    "contracted_collision_max_per_100hrs": 2.0,
+    "sla_period_start": "2026-03-01T00:00:00Z",
+    "sla_status": "compliant",
+    "_comment_sla_checks": "TSR 0.975≥0.92 ✓ | uptime 0.957≥0.90 ✓ | AS 0.96≥0.90 ✓ | MTBI 237.33≥100.0 ✓ | vision 0.958≥0.92 ✓ | collisions 0.281/100hrs≤2.0 ✓",
+    "active_breach_metrics": []
+  },
+
+  "audit": {
+    "_comment_source": "ros2_bridge: MiR200 fleet managed via MiR Fleet software with ROS2 bridge adapter publishing to MachineAssets MARS SDK endpoint. Data validated against MiR Fleet dashboard telemetry before signing.",
+    "data_source": "ros2_bridge",
+    "record_hash": "d4e5f6a7b8c9d0e1f2031425364758697a8b9c0d1e2f3040516273849505b6c7d",
+    "signing_key_id": "mars-sdk-mir200-rtm-001",
+    "certified_by": "MachineAssets Telemetry Gateway v0.9.0"
+  }
+}
