@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MARS v0.9.0",
+  "description": "Machine Assets Reporting Standard — canonical telemetry schema for autonomous machine performance, ROI, and insurance underwriting",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "record_id",
+    "machine_id",
+    "vendor",
+    "model",
+    "serial_number",
+    "timestamp",
+    "record_period",
+    "operational_metrics",
+    "task_metrics",
+    "ai_performance",
+    "stability_safety",
+    "energy_metrics",
+    "maintenance_metrics",
+    "financial_metrics",
+    "environment",
+    "mars_risk_score",
+    "raas_sla",
+    "audit"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema_version": {"type": "string"},
+    "record_id": {"type": "string"},
+    "machine_id": {"type": "string"},
+    "vendor": {"type": "string"},
+    "model": {"type": "string"},
+    "serial_number": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "record_period": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["period_start", "period_end", "period_type"],
+      "properties": {
+        "period_start": {"type": "string", "format": "date-time"},
+        "period_end": {"type": "string", "format": "date-time"},
+        "period_type": {"type": "string", "enum": ["monthly", "weekly", "quarterly", "annual"]}
+      }
+    },
+    "operational_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["uptime_hours", "downtime_hours", "incident_count", "mtbi_hours", "intervention_rate", "autonomy_score"],
+      "properties": {
+        "uptime_hours": {"type": "number", "minimum": 0},
+        "downtime_hours": {"type": "number", "minimum": 0},
+        "incident_count": {"type": "integer", "minimum": 0},
+        "mtbi_hours": {"type": "number", "minimum": 0},
+        "intervention_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "autonomy_score": {"type": "number", "minimum": 0, "maximum": 1},
+        "recovery_time_seconds": {"type": "number", "minimum": 0},
+        "recovery_required_human_pct": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "task_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["tasks_attempted", "tasks_completed", "tasks_failed", "tasks_partial", "task_success_ratio"],
+      "properties": {
+        "tasks_attempted": {"type": "integer", "minimum": 0},
+        "tasks_completed": {"type": "integer", "minimum": 0},
+        "tasks_failed": {"type": "integer", "minimum": 0},
+        "tasks_partial": {"type": "integer", "minimum": 0},
+        "task_success_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "avg_task_duration_seconds": {"type": "number", "minimum": 0},
+        "task_type": {"type": "string"}
+      }
+    },
+    "ai_performance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["vision_accuracy", "hallucination_events", "hallucination_rate"],
+      "properties": {
+        "vision_accuracy": {"type": "number", "minimum": 0, "maximum": 1},
+        "misclassifications": {"type": "integer", "minimum": 0},
+        "hallucination_events": {"type": "integer", "minimum": 0},
+        "hallucination_rate": {"type": "number", "minimum": 0},
+        "drift_index": {"type": "number", "minimum": 0},
+        "model_version": {"type": "string"},
+        "last_model_update": {"type": "string"}
+      }
+    },
+    "stability_safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["falls_detected", "collision_events", "near_miss_events", "iso_10218_compliance", "iso_ts15066_compliance", "iso_13482_compliance", "safety_score"],
+      "properties": {
+        "falls_detected": {"type": "integer", "minimum": 0},
+        "fall_severity_index": {"type": "number"},
+        "collision_events": {"type": "integer", "minimum": 0},
+        "near_miss_events": {"type": "integer", "minimum": 0},
+        "iso_10218_compliance": {"type": "boolean"},
+        "iso_ts15066_compliance": {"type": "boolean"},
+        "iso_13482_compliance": {"type": "boolean"},
+        "safety_score": {"type": "number", "minimum": 0, "maximum": 100}
+      }
+    },
+    "energy_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["energy_kwh_total", "battery_health_pct"],
+      "properties": {
+        "energy_kwh_total": {"type": "number", "minimum": 0},
+        "energy_cost_per_task_usd": {"type": "number", "minimum": 0},
+        "peak_power_draw_kw": {"type": "number", "minimum": 0},
+        "charge_cycles": {"type": "integer", "minimum": 0},
+        "battery_health_pct": {"type": "number", "minimum": 0, "maximum": 100}
+      }
+    },
+    "maintenance_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["maintenance_actions_count", "maintenance_cost_usd", "total_operating_hours_lifetime"],
+      "properties": {
+        "repairability_index": {"type": "number"},
+        "maintenance_actions_count": {"type": "integer", "minimum": 0},
+        "maintenance_cost_usd": {"type": "number", "minimum": 0},
+        "predicted_component_failure_hours": {"type": "number", "minimum": 0},
+        "components_replaced": {"type": "array", "items": {"type": "string"}},
+        "total_operating_hours_lifetime": {"type": "number", "minimum": 0}
+      }
+    },
+    "financial_metrics": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["purchase_price", "expected_lifespan_years", "hle_annual", "displacement_factor", "tco_annual", "am_roi", "depreciation_rate_annual", "robot_age_days"],
+      "properties": {
+        "currency_code": {"type": "string"},
+        "purchase_price": {"type": "number", "minimum": 0},
+        "expected_lifespan_years": {"type": "number", "minimum": 0},
+        "deployment_date": {"type": "string"},
+        "robot_age_days": {"type": "integer", "minimum": 0},
+        "hle_annual": {"type": "number", "minimum": 0},
+        "displacement_factor": {"type": "number", "minimum": 0, "maximum": 1},
+        "revenue_direct_period": {"type": "number"},
+        "cost_per_task": {"type": "number", "minimum": 0},
+        "am_roi": {"type": "number"},
+        "tco_annual": {"type": "number", "minimum": 0},
+        "tco_cumulative": {"type": "number", "minimum": 0},
+        "depreciation_phase": {"type": "string"},
+        "depreciation_rate_annual": {"type": "number", "minimum": 0, "maximum": 1},
+        "estimated_resale_value": {"type": "number", "minimum": 0},
+        "raas_billable_hours": {"type": "number", "minimum": 0},
+        "raas_rate_per_hour": {"type": "number", "minimum": 0},
+        "payback_months_remaining": {"type": "number"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["deployment_type", "terrain_type"],
+      "properties": {
+        "facility_id": {"type": "string"},
+        "location_country": {"type": "string"},
+        "deployment_type": {"type": "string"},
+        "terrain_type": {"type": "string"},
+        "temperature_c": {"type": "number"},
+        "humidity_pct": {"type": "number"},
+        "human_coworkers_present": {"type": "boolean"}
+      }
+    },
+    "mars_risk_score": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["mrs_value", "mrs_risk_class"],
+      "properties": {
+        "mrs_value": {"type": "number", "minimum": 0, "maximum": 1},
+        "mrs_risk_class": {"type": "string"},
+        "mtbi_normalized": {"type": "number", "minimum": 0, "maximum": 1},
+        "safety_score_normalized": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "raas_sla": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["contracted_tsr_minimum", "contracted_uptime_minimum", "contracted_as_minimum", "contracted_mtbi_minimum_hours", "sla_status", "active_breach_metrics"],
+      "properties": {
+        "contracted_tsr_minimum": {"type": "number", "minimum": 0, "maximum": 1},
+        "contracted_uptime_minimum": {"type": "number", "minimum": 0, "maximum": 1},
+        "contracted_as_minimum": {"type": "number", "minimum": 0, "maximum": 1},
+        "contracted_mtbi_minimum_hours": {"type": "number", "minimum": 0},
+        "contracted_vision_accuracy_minimum": {"type": "number", "minimum": 0, "maximum": 1},
+        "contracted_collision_max_per_100hrs": {"type": "number", "minimum": 0},
+        "sla_period_start": {"type": "string"},
+        "sla_status": {"type": "string", "enum": ["compliant", "breach"]},
+        "active_breach_metrics": {"type": "array"}
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["data_source", "record_hash"],
+      "properties": {
+        "data_source": {"type": "string"},
+        "record_hash": {"type": "string"},
+        "signing_key_id": {"type": "string"},
+        "certified_by": {"type": "string"}
+      }
+    }
+  }
+}
