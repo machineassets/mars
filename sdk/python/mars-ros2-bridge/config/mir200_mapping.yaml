@@ -1,0 +1,42 @@
+# MARS v0.9 — MiR200 AMR field mapping
+# Each entry maps one ROS2 topic to one MARS record field.
+# source_field: the key inside the ROS2 message dict that carries the raw value.
+#               Leave blank if the extractor function handles the full message.
+
+robot_id: "mir200-001"
+mars_version: "0.9"
+description: "MiR200 autonomous mobile robot — MARS performance mapping"
+
+mappings:
+  # ── Operational metrics ────────────────────────────────────────────────────
+  - topic: /mir/robot_state
+    source_field: autonomy_level         # float 0.0–1.0 → scaled to 0–100
+    mars_field: operational_metrics.autonomy_score
+    notes: "Reflects MiR mission execution autonomy (0 = manual, 1 = fully autonomous)"
+
+  - topic: /diagnostics
+    source_field: uptime_hours           # cumulative hours since last restart
+    mars_field: operational_metrics.uptime_hours
+
+  # ── Task metrics ───────────────────────────────────────────────────────────
+  - topic: /mir/mission_results
+    source_field: missions_completed
+    mars_field: task_metrics.tasks_completed
+
+  - topic: /mir/mission_results
+    source_field: missions_attempted
+    mars_field: task_metrics.tasks_attempted
+
+  - topic: /mir/mission_results
+    source_field: ""                     # computed from completed / attempted
+    mars_field: task_metrics.task_success_ratio
+
+  # ── Energy metrics ─────────────────────────────────────────────────────────
+  - topic: /mir/battery_state
+    source_field: percentage             # 0.0–1.0 → scaled to 0–100 %
+    mars_field: energy_metrics.battery_health_pct
+
+  # ── Stability & safety ─────────────────────────────────────────────────────
+  - topic: /mir/safety_state
+    source_field: collision_count        # integer count since last reset
+    mars_field: stability_safety.collision_events

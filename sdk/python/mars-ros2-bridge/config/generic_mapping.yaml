@@ -1,0 +1,53 @@
+# MARS v0.9 — Generic ROS2 robot mapping template
+# Copy this file, replace <YOUR_ROBOT_ID> and the topic/source_field values,
+# then point MARSBridge at the new path.
+
+robot_id: "generic-robot-001"
+mars_version: "0.9"
+description: "Template mapping for any ROS2-compatible robot"
+
+mappings:
+  # ── Operational metrics ────────────────────────────────────────────────────
+  # Replace /your_robot/state with the topic that reports autonomy level.
+  # source_field should be a float 0.0–1.0 (bridge scales it to 0–100).
+  - topic: /your_robot/state
+    source_field: autonomy_level
+    mars_field: operational_metrics.autonomy_score
+
+  # Uptime in decimal hours (e.g. 12.5 = 12 hours 30 minutes).
+  - topic: /diagnostics
+    source_field: uptime_hours
+    mars_field: operational_metrics.uptime_hours
+
+  # ── Task metrics ───────────────────────────────────────────────────────────
+  - topic: /your_robot/mission_results
+    source_field: missions_completed
+    mars_field: task_metrics.tasks_completed
+
+  - topic: /your_robot/mission_results
+    source_field: missions_attempted
+    mars_field: task_metrics.tasks_attempted
+
+  # Computed automatically from completed / attempted — leave source_field empty.
+  - topic: /your_robot/mission_results
+    source_field: ""
+    mars_field: task_metrics.task_success_ratio
+
+  # ── Energy metrics ─────────────────────────────────────────────────────────
+  # percentage: either 0.0–1.0 (auto-scaled) or 0–100 (used as-is).
+  - topic: /your_robot/battery_state
+    source_field: percentage
+    mars_field: energy_metrics.battery_health_pct
+
+  # ── Stability & safety ─────────────────────────────────────────────────────
+  - topic: /your_robot/safety_state
+    source_field: collision_count
+    mars_field: stability_safety.collision_events
+
+# ── Extension points ───────────────────────────────────────────────────────
+# Add custom MARS fields by appending entries below.
+# Any dotted path under an existing top-level section will be written.
+# Example:
+#   - topic: /your_robot/env_sensors
+#     source_field: temperature_c
+#     mars_field: operational_metrics.ambient_temperature_c
