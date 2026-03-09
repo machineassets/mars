@@ -7,7 +7,7 @@ Official MARS client libraries.
 
 | Language | Package | Status |
 |----------|---------|--------|
-| Python | `mars-python` | Coming Q2 2026 |
+| Python | `mars-python` | mars-core (Python) — canonical formula implementation with 22 passing tests. Install: pip install -e sdk/python/mars-core |
 | TypeScript | `mars-ts` | Coming Q2 2026 |
 | ROS2 | `mars-ros2` | Coming Q2 2026 |
 
