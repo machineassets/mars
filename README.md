@@ -240,6 +240,18 @@ MARS v0.9 is a public draft actively seeking review from:
 
 ---
 
+## SDK
+
+| Language | Package | Status |
+|----------|---------|--------|
+| Python | `mars-core` | Canonical formula implementation, 22 tests passing. `pip install -e sdk/python/mars-core` |
+| TypeScript | `mars-ts` | Coming Q2 2026 |
+| ROS2 | `mars-ros2` | Coming Q2 2026 |
+
+All official MARS calculations are implemented in `sdk/python/mars-core` with tests against three reference payloads. If you change any formula, update `mars-core` and its tests first.
+
+---
+
 ## Files
 
 | File | Description |
